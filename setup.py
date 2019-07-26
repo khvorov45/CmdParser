@@ -1,11 +1,13 @@
 # pylint: disable=missing-docstring
 import setuptools
 
+NAME = "cmdparserkhv"
+
 with open("README.md", "r") as fh:
     LONG_DESCRIPTION = fh.read()
 
 setuptools.setup(
-    name="cmdparser-khvorov45",
+    name=NAME,
     version="0.0.2",
     author="Arseniy Khvorov",
     author_email="khvorov45@gmail.com",

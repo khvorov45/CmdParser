@@ -14,7 +14,7 @@ setuptools.setup(
     description="Parses command line input",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
-    url="https://github.com/khvorov45/cdmparser",
+    url="https://github.com/khvorov45/CmdParser",
     packages=setuptools.find_packages(),
     license="MIT",
     classifiers=[

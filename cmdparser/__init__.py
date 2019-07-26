@@ -1,2 +1,4 @@
 # pylint: skip-file
-name = "cmdparser"
+from parser import CmdParser, build_option_entry
+
+name = "cmdparser-khvorov45"

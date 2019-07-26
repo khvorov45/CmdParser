@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="cmdparser-khvorov45",
-    version="0.0.1",
+    version="0.0.2",
     author="Arseniy Khvorov",
     author_email="khvorov45@gmail.com",
     description="Parses command line input",

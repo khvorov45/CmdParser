@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name=NAME,
-    version="0.0.0.9003",
+    version="0.0.0.9004",
     author="Arseniy Khvorov",
     author_email="khvorov45@gmail.com",
     description="Parses command line input",

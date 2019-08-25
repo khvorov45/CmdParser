@@ -1,5 +1,9 @@
 """Parsing command line input"""
 
+from colorama import init, Fore
+
+init(autoreset=True)
+
 class CmdParser:
     """Parses command line input. Expects it unmodified.
 
@@ -18,6 +22,7 @@ class CmdParser:
         self.set_opt_dic(opt_dic)
         self._opts = {}
         self._read_opts()
+        self._fill_def()
 
     def get_opts(self):
         """Returns the parsed options"""
@@ -71,13 +76,85 @@ class CmdParser:
                 continue
             if arg in opd.keys():
                 self.remove_unproc(arg)
-                opt_name = opd[arg][0]
-                opt_fun = opd[arg][1]
-                if not opt_fun: # Boolean option
+                opt = opd[arg]
+                opt_name = opt.get_name()
+                if opt.is_bool():
                     self.add_opt(opt_name, True)
                     continue
-                # Non-boolean option
+                try:
+                    next_arg = opts[i + 1]
+                    if next_arg in opd.keys():
+                        raise IndexError
+                except IndexError:
+                    raise Exception("expected option after " + arg)
                 skip_next = True
-                self.add_opt(opt_name, opt_fun(opts[i + 1]))
+                self.add_opt(opt_name, opt.process(next_arg))
             else:
                 new_unprocessed.append(arg)
+
+    def _fill_def(self):
+        """Fills in missing defaults"""
+        opd = self.get_opt_dic()
+        opt_pres = self.get_opts()
+
+        for opt in opd.values():
+            opt_name = opt.get_name()
+            if opt_name in opt_pres.keys():
+                continue
+            if opt.is_bool():
+                self.add_opt(opt_name, False)
+                continue
+            self.add_opt(opt_name, opt.get_def())
+
+class Cmdent:
+    """Represents one value in the option dictionary
+
+    Arguments:
+        name: proper option name.
+        allowed: a list with allowed arguments. If None, option is assumed to
+            be boolean.
+    """
+    def __init__(self, name, allowed=None):
+        self._name = ""
+        self.set_name(name)
+        self._all = None
+        self.set_all(allowed)
+
+    def set_name(self, name):
+        """Sets the name"""
+        self._name = name
+
+    def get_name(self):
+        """Returns the name"""
+        return self._name
+
+    def set_all(self, allowed):
+        """Sets allowed values"""
+        if not (allowed is None) | (isinstance(allowed, list)):
+            raise Exception("allowed should be a list or None")
+        self._all = allowed
+
+    def get_all(self):
+        """Returns the allowed values"""
+        return self._all
+
+    def is_bool(self):
+        """Returns boolean status"""
+        return self._all is None
+
+    def get_def(self):
+        """Returns the default value"""
+        if self.is_bool():
+            return False
+        return self._all[0]
+
+    def process(self, arg):
+        """Prcesses the argument"""
+        if arg not in self.get_all():
+            print_yellow("option " + arg + " not recognised, using default")
+            return self.get_def()
+        return arg
+
+def print_yellow(string):
+    """Prints string in yellow"""
+    print(Fore.YELLOW + string)

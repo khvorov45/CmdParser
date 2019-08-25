@@ -1,2 +1,2 @@
 # pylint: skip-file
-from .parser import CmdParser
+from .parser import CmdParser, Cmdent

@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name=NAME,
-    version="0.0.2",
+    version="0.0.0.9003",
     author="Arseniy Khvorov",
     author_email="khvorov45@gmail.com",
     description="Parses command line input",
@@ -21,5 +21,8 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent"
+    ],
+    install_requires=[
+        "colorama"
     ]
 )

@@ -130,8 +130,9 @@ class Cmdent:
 
     def set_all(self, allowed):
         """Sets allowed values"""
-        if not (allowed is None) | (isinstance(allowed, list)):
-            raise Exception("allowed should be a list or None")
+        if not (allowed is None) | (isinstance(allowed, list)) | \
+            isinstance(allowed, range):
+            raise Exception("allowed should be a list, range or None")
         self._all = allowed
 
     def get_all(self):

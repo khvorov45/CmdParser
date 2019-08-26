@@ -12,7 +12,7 @@ def run_parser(args):
     """Runs the parser with some sample options"""
     opts = {
         "-o1": Cmdent("option1", allowed=["a", "b"]),
-        "-o2": Cmdent("option2")
+        "-o2": Cmdent("option2", range(-1, 10^6))
     }
     opts_parsed = CmdParser(args, opts)
     print(opts_parsed.get_opts())

@@ -114,11 +114,11 @@ class Cmdent:
         allowed: a list with allowed arguments. If None, option is assumed to
             be boolean.
     """
+    # pylint: disable=attribute-defined-outside-init
+    # I'm using setters/getters here, those attributes in init would look messy
     def __init__(self, name, allowed=None):
-        self._name = ""
-        self.set_name(name)
-        self._all = None
-        self.set_all(allowed)
+        self.name = name
+        self.allowed = allowed
 
     def set_name(self, name):
         """Sets the name"""
@@ -128,32 +128,45 @@ class Cmdent:
         """Returns the name"""
         return self._name
 
-    def set_all(self, allowed):
-        """Sets allowed values"""
-        if not (allowed is None) | (isinstance(allowed, list)) | \
-            isinstance(allowed, range):
-            raise Exception("allowed should be a list, range or None")
-        self._all = allowed
+    name = property(get_name, set_name)
 
-    def get_all(self):
+    def set_allowed(self, allowed):
+        """Sets allowed values"""
+        is_none = allowed is None
+        is_list = isinstance(allowed, list)
+        is_range = isinstance(allowed, range)
+        if not is_none | is_list | is_range:
+            raise Exception("allowed should be a list, range or None")
+        self._allowed = allowed
+
+    def get_allowed(self):
         """Returns the allowed values"""
-        return self._all
+        return self._allowed
+
+    allowed = property(get_allowed, set_allowed)
 
     def is_bool(self):
         """Returns boolean status"""
-        return self._all is None
+        return self._allowed is None
 
     def get_def(self):
         """Returns the default value"""
         if self.is_bool():
             return False
-        return self._all[0]
+        return self._allowed[0]
 
     def process(self, arg):
-        """Prcesses the argument"""
-        if arg not in self.get_all():
+        """Processes the argument"""
+        arg = self._pre_process(arg)
+        if arg not in self.get_allowed():
             print_yellow("option " + arg + " not recognised, using default")
             return self.get_def()
+        return arg
+
+    def _pre_process(self, arg):
+        """Converts the argument to the appropriate type"""
+        if isinstance(self.allowed, range):
+            arg = int(arg)
         return arg
 
 def print_yellow(string):

@@ -15,96 +15,82 @@ class CmdParser:
             Where fun is a function to get the next word. If fun = False,
             the option is assumed to be boolean.
     """
+    # pylint: disable=attribute-defined-outside-init
+    # I'm using setters/getters here, those attributes in init would look messy
     def __init__(self, system_arguments, opt_dic):
-        self._unproc = []
-        self.add_unproc(system_arguments[1:]) # Ignore the first
-        self._opt_dic = {}
-        self.set_opt_dic(opt_dic)
-        self._opts = {}
-        self._read_opts()
-        self._fill_def()
+        self.args = system_arguments
+        self.opt_dic = opt_dic
+        self._unprocessed = system_arguments
+        self._parsed = {}
+        self._is_parsed = False
 
-    def get_opts(self):
-        """Returns the parsed options"""
-        return self._opts.copy()
+    @property
+    def args(self):
+        """Unmodified command line arguments"""
+        self._is_parsed = False
+        return self._args
 
-    def add_opt(self, name, val):
-        """Adds an option to the dictionary"""
-        self._opts[name] = val
+    @args.setter
+    def args(self, new_args):
+        if not isinstance(new_args, list):
+            raise TypeError
+        self._args = new_args
 
-    def remove_opt(self, name):
-        """Removes an entry from the optin dictionary"""
-        del self._opts[name]
+    @property
+    def opt_dic(self):
+        """Options dictionary"""
+        self._is_parsed = False
+        return self._opt_dic
 
-    def get_unproc(self):
-        """Returns what's not been processed as an option"""
-        return self._unproc.copy()
+    @opt_dic.setter
+    def opt_dic(self, new_dic):
+        if not isinstance(new_dic, dict):
+            raise TypeError
+        self._opt_dic = new_dic
 
-    def add_unproc(self, arg):
-        """Adds an unparsed option"""
-        if isinstance(arg, list):
-            for onearg in arg:
-                self._unproc.append(onearg)
-        else:
-            self._unproc.append(arg)
+    def parse(self):
+        """Parses the unprocessed options according to the dictionary"""
 
-    def remove_unproc(self, ind):
-        """Removes an unprocessed option by value"""
-        self._unproc.remove(ind)
+        opd = self.opt_dic
+        args = self._unprocessed
 
-    def set_opt_dic(self, opt_dic):
-        """Sets the option dictionary"""
-        self._opt_dic = opt_dic
-
-    def get_opt_dic(self):
-        """Returns the option dictionary"""
-        return self._opt_dic.copy()
-
-    def _read_opts(self):
-        """Attempts to read the unprocessed options"""
-
-        opd = self.get_opt_dic()
-        opts = self.get_unproc()
-
-        # See what arguments have been provided
         new_unprocessed = []
         skip_next = False
-        for i, arg in enumerate(opts):
+        for i, arg in enumerate(args):
             if skip_next:
-                self.remove_unproc(arg)
                 skip_next = False
                 continue
             if arg in opd.keys():
-                self.remove_unproc(arg)
                 opt = opd[arg]
-                opt_name = opt.get_name()
                 if opt.is_bool():
-                    self.add_opt(opt_name, True)
+                    self._parsed.update({opt.name: True})
                     continue
                 try:
-                    next_arg = opts[i + 1]
+                    next_arg = args[i + 1]
                     if next_arg in opd.keys():
                         raise IndexError
                 except IndexError:
                     raise Exception("expected option after " + arg)
                 skip_next = True
-                self.add_opt(opt_name, opt.process(next_arg))
+                self._parsed.update({opt.name: opt.process(next_arg)})
             else:
                 new_unprocessed.append(arg)
+        self._unprocessed = new_unprocessed
+        self._is_parsed = True
 
-    def _fill_def(self):
-        """Fills in missing defaults"""
-        opd = self.get_opt_dic()
-        opt_pres = self.get_opts()
-
-        for opt in opd.values():
-            opt_name = opt.get_name()
-            if opt_name in opt_pres.keys():
+    def get_all_options(self):
+        """Returns all options as per the dictionary"""
+        if not self._is_parsed:
+            self.parse()
+        all_opts = self._parsed
+        for opt in self.opt_dic.values():
+            if opt.name in self._parsed.keys():
                 continue
             if opt.is_bool():
-                self.add_opt(opt_name, False)
+                all_opts.update({opt.name: False})
                 continue
-            self.add_opt(opt_name, opt.get_def())
+            all_opts.update({opt.name: opt.get_def()})
+        return all_opts
 
 class Cmdent:
     """Represents one value in the option dictionary
@@ -120,18 +106,22 @@ class Cmdent:
         self.name = name
         self.allowed = allowed
 
-    def set_name(self, name):
-        """Sets the name"""
-        self._name = name
-
-    def get_name(self):
-        """Returns the name"""
+    @property
+    def name(self):
+        """Option name"""
         return self._name
 
-    name = property(get_name, set_name)
+    @name.setter
+    def name(self, name):
+        self._name = name
 
-    def set_allowed(self, allowed):
-        """Sets allowed values"""
+    @property
+    def allowed(self):
+        """Allowed choices"""
+        return self._allowed
+
+    @allowed.setter
+    def allowed(self, allowed):
         is_none = allowed is None
         is_list = isinstance(allowed, list)
         is_range = isinstance(allowed, range)
@@ -139,26 +129,20 @@ class Cmdent:
             raise Exception("allowed should be a list, range or None")
         self._allowed = allowed
 
-    def get_allowed(self):
-        """Returns the allowed values"""
-        return self._allowed
-
-    allowed = property(get_allowed, set_allowed)
-
     def is_bool(self):
         """Returns boolean status"""
-        return self._allowed is None
+        return self.allowed is None
 
     def get_def(self):
         """Returns the default value"""
         if self.is_bool():
             return False
-        return self._allowed[0]
+        return self.allowed[0]
 
     def process(self, arg):
         """Processes the argument"""
         arg = self._pre_process(arg)
-        if arg not in self.get_allowed():
+        if arg not in self.allowed:
             print_yellow("option " + arg + " not recognised, using default")
             return self.get_def()
         return arg

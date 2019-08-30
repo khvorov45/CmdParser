@@ -16,6 +16,7 @@ def run_parser(args):
     }
     opts_parsed = CmdParser(args, opts)
     print(opts_parsed.get_all_options())
+    print(opts_parsed.get_unrecognised())
 
 def get_o1(arg=None):
     """Gets argument 1"""

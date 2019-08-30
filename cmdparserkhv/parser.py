@@ -20,7 +20,7 @@ class CmdParser:
     def __init__(self, system_arguments, opt_dic):
         self.args = system_arguments
         self.opt_dic = opt_dic
-        self._unprocessed = system_arguments
+        self._unprocessed = system_arguments[1:] # 0 is script name
         self._parsed = {}
         self._is_parsed = False
 
@@ -91,6 +91,12 @@ class CmdParser:
                 continue
             all_opts.update({opt.name: opt.get_def()})
         return all_opts
+
+    def get_unrecognised(self):
+        """Returns everything that's not recognised as an option"""
+        if not self._is_parsed:
+            self.parse()
+        return self._unprocessed
 
 class Cmdent:
     """Represents one value in the option dictionary

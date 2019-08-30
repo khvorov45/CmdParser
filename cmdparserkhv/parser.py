@@ -11,16 +11,16 @@ class CmdParser:
         system_arguments: a list of strings. Expected to be unmodified
             command line input
         opt_dic: a dictionary of options of the structure:
-            indicator : [name, fun]
-            Where fun is a function to get the next word. If fun = False,
-            the option is assumed to be boolean.
+            indicator : [name, Cmdend(name, allowed)]
+            Where name is the option name and allowed is a list, a range or
+            None. If None, option is assumed to be boolean.
     """
     # pylint: disable=attribute-defined-outside-init
     # I'm using setters/getters here, those attributes in init would look messy
-    def __init__(self, system_arguments, opt_dic):
-        self.args = system_arguments
+    def __init__(self, args, opt_dic):
+        self.args = args
         self.opt_dic = opt_dic
-        self._unprocessed = system_arguments[1:] # 0 is script name
+        self._unprocessed = args[1:] # 0 is script name
         self._parsed = {}
         self._is_parsed = False
 
@@ -53,7 +53,6 @@ class CmdParser:
 
         opd = self.opt_dic
         args = self._unprocessed
-
         new_unprocessed = []
         skip_next = False
         for i, arg in enumerate(args):

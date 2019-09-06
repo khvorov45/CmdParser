@@ -26,7 +26,7 @@ def test_empty():
             "option_boolean": False,
             "option_numeric": 0,
             "option_string": "choice1",
-            "option_wildcard": ""
+            "option_wildcard": None
         },
         "unrecognised": ["path/to/file"]
     }

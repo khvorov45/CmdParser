@@ -104,7 +104,7 @@ class Cmdent:
         name: proper option name.
         restrict: a list with restrict arguments. List, range, None or 'bool'
             If None, option is assumed to be a wildcard. Wildcard default is
-            an empty string. Wildcard choices are returned as-is.
+            None. Wildcard choices are returned as-is.
     """
     # pylint: disable=attribute-defined-outside-init
     # I'm using setters/getters here, those attributes in init would look messy
@@ -149,7 +149,7 @@ class Cmdent:
         if self.is_bool():
             return False
         if self.is_wild():
-            return ""
+            return None
         return self.restrict[0]
 
     def process(self, arg):

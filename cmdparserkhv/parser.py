@@ -102,14 +102,15 @@ class Cmdent:
 
     Arguments:
         name: proper option name.
-        allowed: a list with allowed arguments. If None, option is assumed to
-            be boolean.
+        restrict: a list with restrict arguments. List, range, None or 'bool'
+            If None, option is assumed to be a wildcard. Wildcard default is
+            an empty string. Wildcard choices are returned as-is.
     """
     # pylint: disable=attribute-defined-outside-init
     # I'm using setters/getters here, those attributes in init would look messy
-    def __init__(self, name, allowed=None):
+    def __init__(self, name, restrict=None):
         self.name = name
-        self.allowed = allowed
+        self.restrict = restrict
 
     @property
     def name(self):
@@ -121,40 +122,49 @@ class Cmdent:
         self._name = name
 
     @property
-    def allowed(self):
-        """Allowed choices"""
-        return self._allowed
+    def restrict(self):
+        """Restrict choices"""
+        return self._restrict
 
-    @allowed.setter
-    def allowed(self, allowed):
-        is_none = allowed is None
-        is_list = isinstance(allowed, list)
-        is_range = isinstance(allowed, range)
-        if not is_none | is_list | is_range:
-            raise Exception("allowed should be a list, range or None")
-        self._allowed = allowed
+    @restrict.setter
+    def restrict(self, restrict):
+        is_none = restrict is None
+        is_list = isinstance(restrict, list)
+        is_range = isinstance(restrict, range)
+        is_bool = restrict == "bool"
+        if not is_none | is_list | is_range | is_bool:
+            raise Exception("restrict should be a list, range, 'bool' or None")
+        self._restrict = restrict
 
     def is_bool(self):
         """Returns boolean status"""
-        return self.allowed is None
+        return self.restrict == "bool"
+
+    def is_wild(self):
+        """Returns wildcard status"""
+        return self.restrict is None
 
     def get_def(self):
         """Returns the default value"""
         if self.is_bool():
             return False
-        return self.allowed[0]
+        if self.is_wild():
+            return ""
+        return self.restrict[0]
 
     def process(self, arg):
         """Processes the argument"""
+        if self.is_wild():
+            return arg
         arg = self._pre_process(arg)
-        if arg not in self.allowed:
+        if arg not in self.restrict:
             print_yellow("option " + arg + " not recognised, using default")
             return self.get_def()
         return arg
 
     def _pre_process(self, arg):
         """Converts the argument to the appropriate type"""
-        if isinstance(self.allowed, range):
+        if isinstance(self.restrict, range):
             arg = int(arg)
         return arg
 

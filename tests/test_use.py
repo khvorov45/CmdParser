@@ -3,9 +3,10 @@
 from cmdparserkhv import CmdParser, Cmdent
 
 OPT_DIC = {
-    "-obool": Cmdent("option_boolean"),
+    "-obool": Cmdent("option_boolean", "bool"),
     "-onum": Cmdent("option_numeric", range(0, 10)),
-    "-ostr": Cmdent("option_string", ["choice1", "choice2"])
+    "-ostr": Cmdent("option_string", ["choice1", "choice2"]),
+    "-owild": Cmdent("option_wildcard")
 }
 
 def generic(use_case, wanted_result):
@@ -24,7 +25,8 @@ def test_empty():
         "opt_dic_parsed": {
             "option_boolean": False,
             "option_numeric": 0,
-            "option_string": "choice1"
+            "option_string": "choice1",
+            "option_wildcard": ""
         },
         "unrecognised": ["path/to/file"]
     }
@@ -34,14 +36,18 @@ def test_all_supplied():
     """Tests using the compiler with all options supplied"""
     use_case = [
         "script.py",
-        "-obool", "-onum", "3", "-ostr", "choice2",
+        "-obool",
+        "-onum", "3",
+        "-ostr", "choice2",
+        "-owild", "wild-option",
         "path/to/file"
     ]
     wanted_result = {
         "opt_dic_parsed": {
             "option_boolean": True,
             "option_numeric": 3,
-            "option_string": "choice2"
+            "option_string": "choice2",
+            "option_wildcard": "wild-option"
         },
         "unrecognised": ["path/to/file"]
     }

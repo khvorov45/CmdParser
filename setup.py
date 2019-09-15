@@ -8,13 +8,13 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name=NAME,
-    version="0.0.0.9011",
+    version="0.1.0",
     author="Arseniy Khvorov",
     author_email="khvorov45@gmail.com",
     description="Parses command line input",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
-    url="https://github.com/khvorov45/CmdParser",
+    url="https://github.com/khvorov45/cmdparserkhv",
     packages=setuptools.find_packages(),
     license="MIT",
     classifiers=[
